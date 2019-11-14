@@ -1,0 +1,14 @@
+<configuration>
+  <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
+    <encoder>
+      <pattern>%-5level %logger{24} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.grouplens.grapht" level="${grapht.log.level:-WARN}"/>
+
+  <root level="${log.level:-INFO}">
+    <appender-ref ref="STDERR" />
+  </root>
+</configuration>
