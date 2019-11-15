@@ -50,8 +50,8 @@ public class TFIDFItemScorer extends AbstractItemScorer {
     public ResultMap scoreWithDetails(long user, @Nonnull Collection<Long> items){
         // Get the user's ratings
         List<Rating> ratings = dao.query(Rating.class)
-                                  .withAttribute(CommonAttributes.USER_ID, user)
-                                  .get();
+                .withAttribute(CommonAttributes.USER_ID, user)
+                .get();
 
         if (ratings == null) {
             // the user doesn't exist, so return an empty ResultMap
@@ -66,55 +66,39 @@ public class TFIDFItemScorer extends AbstractItemScorer {
 
         for (Long item: items) {
             Map<String, Double> iv = model.getItemVector(item);
-
             // TODO Compute the cosine of this item and the user's profile, store it in the output list
             // TODO And remove this exception to say you've implemented it
+            Double sumVal = new Double(0);
+            Double squareItemVal = new Double(0);
+            Double uTagSquare = new Double(0);
+
+            // numerator: dot product between the tag weight and the tag value in the user profile
+            for(Map.Entry<String, Double> entry:iv.entrySet()){
+                String tagName = entry.getKey();
+                Double tagVal = entry.getValue();
+                if (userVector.containsKey(tagName)){
+                    sumVal += tagVal * userVector.get(tagName);
+                }
+            }
+            // square the tags values
+            for(Map.Entry<String,Double> entry1:iv.entrySet()){
+                squareItemVal += Math.pow(entry1.getValue(), 2);
+            }
+            // sum of user profiles tags
+            for(Map.Entry<String,Double> entry2:userVector.entrySet()){
+                uTagSquare += Math.pow(entry2.getValue(), 2);;
+            }
+            Double denom = new Double(Math.sqrt(uTagSquare) * Math.sqrt(squareItemVal));
             // If the denominator of the cosine similarity is 0, skip the item
+            if(denom!=0){
+                Double value = new Double(sumVal/ denom);
+                results.add(Results.create(item, value));
+            }
 
-            throw new UnsupportedOperationException("stub implementation");
         }
-
         return Results.newResultMap(results);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

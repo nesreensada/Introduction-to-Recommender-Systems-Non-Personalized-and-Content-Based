@@ -1,6 +1,7 @@
 package org.lenskit.mooc.cbf;
 
 import org.lenskit.data.ratings.Rating;
+import org.lenskit.data.ratings.Ratings;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -29,7 +30,22 @@ public class WeightedUserProfileBuilder implements UserProfileBuilder {
 
         // TODO Normalize the user's ratings
         // TODO Build the user's weighted profile
-
+        Double sumRatings = new Double(0);
+        int count = 0;
+        for (Rating rating: ratings){
+            sumRatings += rating.getValue();
+            count ++;
+        }
+        Double meanRating = sumRatings/count;
+        //iterate through ratings and update them
+        for (Rating rating:ratings){
+            Map<String, Double> itemId = model.getItemVector(rating.getItemId());
+            for (Map.Entry<String, Double> entry: itemId.entrySet()){
+                String tag = entry.getKey();
+                Double normalizedValue = entry.getValue() * (rating.getValue() - meanRating);
+                profile.put(tag, profile.containsKey(tag)?profile.get(tag)+normalizedValue:normalizedValue);
+            }
+        }
 
         // The profile is accumulated, return it.
         return profile;

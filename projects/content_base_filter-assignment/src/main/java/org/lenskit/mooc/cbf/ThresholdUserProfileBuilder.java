@@ -37,6 +37,12 @@ public class ThresholdUserProfileBuilder implements UserProfileBuilder {
             if (r.getValue() >= RATING_THRESHOLD) {
 
                 // TODO Get this item's vector and add it to the user's profile
+                Map<String, Double> ItemId = model.getItemVector(r.getItemId());
+                for (Map.Entry<String, Double> entry: ItemId.entrySet()){
+                    String tag = entry.getKey();
+                    Double minVal = entry.getValue();
+                    profile.put(tag, profile.containsKey(tag)?profile.get(tag)+minVal:minVal);
+                }
             }
         }
 
